@@ -1,0 +1,24 @@
+{
+  "items": [
+    {
+      "id": "mszucp96u92f",
+      "title": "Hello",
+      "type": "series",
+      "genre": "أخرى",
+      "year": "2001",
+      "rating": "10",
+      "poster": "https://cdn.jsdelivr.net/gh/hpn7pw2mps-hue/Movie-love-@main/posters/mszucp96u92f.jpg",
+      "desc": "2",
+      "added": 1787128814082,
+      "episodes": [
+        {
+          "id": "mszucq9ueesb",
+          "season": 1,
+          "num": 1,
+          "title": "الحلقة 1",
+          "video": "2"
+        }
+      ]
+    }
+  ]
+}

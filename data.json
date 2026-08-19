@@ -19,6 +19,26 @@
           "video": "2"
         }
       ]
+    },
+    {
+      "id": "mszul2rpc8j2",
+      "title": "H",
+      "type": "series",
+      "genre": "رومانسي",
+      "year": "",
+      "rating": "20",
+      "poster": "https://cdn.jsdelivr.net/gh/hpn7pw2mps-hue/Movie-love-@main/posters/mszul2rpc8j2.jpg",
+      "desc": "2",
+      "added": 1787129204680,
+      "episodes": [
+        {
+          "id": "mszul3nsaq1w",
+          "season": 1,
+          "num": 1,
+          "title": "الحلقة 1",
+          "video": "2"
+        }
+      ]
     }
   ]
 }

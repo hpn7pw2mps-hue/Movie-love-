@@ -302,6 +302,21 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px 16px;bor
       </div>
     </div>
 
+    <!-- TMDB search -->
+    <div class="form-card" style="margin-bottom:16px">
+      <h3>🔎 بحث TMDB (تعبئة تلقائية)</h3>
+      <div class="f-row single">
+        <div class="field">
+          <label>ابحث عن اسم الفيلم أو المسلسل</label>
+          <div style="display:flex;gap:8px">
+            <input id="tmdbQuery" placeholder="اكتب الاسم... (مثال: Inception)" onkeydown="if(event.key==='Enter'){event.preventDefault();searchTMDB()}">
+            <button class="btn btn-primary" style="flex-shrink:0" onclick="searchTMDB()">بحث</button>
+          </div>
+        </div>
+      </div>
+      <div id="tmdbResults" style="display:flex;gap:10px;overflow-x:auto;padding-top:10px"></div>
+    </div>
+
     <!-- add/edit form -->
     <div class="form-card">
       <h3 id="formTitle">➕ إضافة محتوى جديد</h3>
@@ -584,6 +599,80 @@ function openPlayer(url,title,progKey){
 function closePlayer(){
   document.getElementById('playerWrap').innerHTML='';
   document.getElementById('playerOverlay').classList.remove('open');
+}
+
+/* ================== TMDB Integration ================== */
+const TMDB_TOKEN='eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjlkMjY3Y2Y5MDBjODExZTY1MGU4MTBjNmE1MDY5NyIsIm5iZiI6MTc4NzEwMzE1Ni4yNzQsInN1YiI6IjZhODUwN2I0ZTEzODJmYmZhNDlhNDQwNiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.-QNnn2wCT701-vDjLfw-y2qyOEXjdfUwcRAzeym3enw';
+const TMDB_BASE='https://api.themoviedb.org/3';
+const TMDB_IMG='https://image.tmdb.org/t/p/w342';
+let tmdbGenreMap={}; // id -> arabic name (from TMDB)
+let tmdbGenresLoaded=false;
+let tmdbLastResults=[];
+const SITE_GENRES=['أكشن','دراما','كوميدي','رعب','خيال علمي','رومانسي','أنمي','وثائقي','أخرى'];
+
+async function tmdbFetch(path){
+  const res=await fetch(TMDB_BASE+path,{headers:{'Authorization':'Bearer '+TMDB_TOKEN,'accept':'application/json'}});
+  if(!res.ok) throw new Error('TMDB error '+res.status);
+  return res.json();
+}
+async function loadTMDBGenres(){
+  if(tmdbGenresLoaded) return;
+  try{
+    const [mv,tv]=await Promise.all([
+      tmdbFetch('/genre/movie/list?language=ar'),
+      tmdbFetch('/genre/tv/list?language=ar')
+    ]);
+    [...(mv.genres||[]),...(tv.genres||[])].forEach(g=>{ tmdbGenreMap[g.id]=g.name; });
+    tmdbGenresLoaded=true;
+  }catch(e){ /* عدم توفر التصنيفات ليس خطأ حرج */ }
+}
+function mapGenre(ids){
+  for(const id of (ids||[])){
+    const name=tmdbGenreMap[id];
+    if(!name) continue;
+    const hit=SITE_GENRES.find(sg=>name.includes(sg)||sg.includes(name));
+    if(hit) return hit;
+  }
+  return 'أخرى';
+}
+async function searchTMDB(){
+  const q=document.getElementById('tmdbQuery').value.trim();
+  const box=document.getElementById('tmdbResults');
+  if(!q){ toast('اكتب اسم للبحث ⚠️'); return }
+  box.innerHTML='<p class="hint">جارِ البحث...</p>';
+  try{
+    await loadTMDBGenres();
+    const data=await tmdbFetch('/search/multi?query='+encodeURIComponent(q)+'&language=ar&include_adult=false');
+    tmdbLastResults=(data.results||[]).filter(r=>r.media_type==='movie'||r.media_type==='tv');
+    if(!tmdbLastResults.length){ box.innerHTML='<p class="hint">لا توجد نتائج</p>'; return }
+    box.innerHTML=tmdbLastResults.map((r,idx)=>{
+      const title=r.title||r.name||'';
+      const year=(r.release_date||r.first_air_date||'').slice(0,4);
+      const poster=r.poster_path?TMDB_IMG+r.poster_path:'';
+      return `<div onclick="applyTMDBResult(${idx})" style="flex-shrink:0;width:110px;cursor:pointer">
+        <div style="width:110px;aspect-ratio:2/3;border-radius:10px;overflow:hidden;background:var(--card2);border:1px solid var(--border)">
+          ${poster?`<img src="${esc(poster)}" style="width:100%;height:100%;object-fit:cover">`:'<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted)">🎬</div>'}
+        </div>
+        <div style="font-size:11px;margin-top:4px;text-align:center;line-height:1.3">${esc(title)}${year?' ('+year+')':''}</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    box.innerHTML='<p class="hint">فشل البحث — تأكد من مفتاح TMDB ❌</p>';
+  }
+}
+function applyTMDBResult(idx){
+  const r=tmdbLastResults[idx]; if(!r) return;
+  const type=r.media_type==='tv'?'series':'movie';
+  document.getElementById('f_title').value=r.title||r.name||'';
+  document.getElementById('f_type').value=type;
+  onTypeChange();
+  document.getElementById('f_year').value=(r.release_date||r.first_air_date||'').slice(0,4);
+  document.getElementById('f_rating').value=r.vote_average?Math.round(r.vote_average*10)/10:'';
+  document.getElementById('f_poster').value=r.poster_path?TMDB_IMG+r.poster_path:'';
+  document.getElementById('f_desc').value=r.overview||'';
+  document.getElementById('f_genre').value=mapGenre(r.genre_ids);
+  toast('تم تعبئة البيانات من TMDB ✅ — أضف رابط الفيديو يدوياً');
+  window.scrollTo({top:document.getElementById('formTitle').offsetTop-20,behavior:'smooth'});
 }
 
 /* ================== Admin ================== */

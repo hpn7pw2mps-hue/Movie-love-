@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>سينما بلس | مشاهدة أفلام ومسلسلات</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{
+  --bg:#0b0e14; --bg2:#12161f; --card:#171c27; --card2:#1e2431;
+  --accent:#e50914; --accent2:#ff4d57; --gold:#f5c518;
+  --text:#f2f4f8; --muted:#8b93a5; --border:#262d3b;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Segoe UI',Tahoma,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; overflow-x:hidden;
+}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#2a3242;border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== Header ===== */
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(11,14,20,.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;cursor:pointer;white-space:nowrap}
+.logo span{color:var(--accent)}
+.logo .icon{font-size:24px}
+.search-box{flex:1;position:relative}
+.search-box input{
+  width:100%;padding:10px 40px 10px 14px;border-radius:24px;
+  border:1px solid var(--border);background:var(--card);color:var(--text);
+  font-size:14px;outline:none;transition:.2s;
+}
+.search-box input:focus{border-color:var(--accent)}
+.search-box .s-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.icon-btn{
+  background:var(--card);border:1px solid var(--border);color:var(--text);
+  width:40px;height:40px;border-radius:12px;cursor:pointer;font-size:17px;
+  display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0;
+}
+.icon-btn:hover{background:var(--card2);border-color:var(--accent)}
+.icon-btn.active{background:var(--accent);border-color:var(--accent)}
+
+/* ===== Hero ===== */
+.hero{
+  position:relative;max-width:1200px;margin:18px auto 0;padding:0 16px;
+}
+.hero-card{
+  position:relative;border-radius:20px;overflow:hidden;height:300px;
+  background:linear-gradient(135deg,#1a1f2e,#0d1017);
+  display:flex;align-items:flex-end;cursor:pointer;border:1px solid var(--border);
+}
+.hero-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.55}
+.hero-card::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(11,14,20,.95),transparent 65%)}
+.hero-info{position:relative;z-index:2;padding:24px;width:100%}
+.hero-info .tag{background:var(--accent);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:700}
+.hero-info h2{font-size:26px;margin:10px 0 6px}
+.hero-info p{color:var(--muted);font-size:14px;max-width:560px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hero-info .meta{margin-top:8px;font-size:13px;color:var(--gold)}
+
+/* ===== Sections ===== */
+.container{max-width:1200px;margin:0 auto;padding:0 16px}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:28px 0 14px}
+.section-title h3{font-size:19px;display:flex;align-items:center;gap:8px}
+.section-title h3::before{content:'';width:4px;height:20px;background:var(--accent);border-radius:4px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  padding:8px 18px;border-radius:22px;background:var(--card);border:1px solid var(--border);
+  color:var(--muted);font-size:13px;cursor:pointer;white-space:nowrap;transition:.2s;font-weight:600;
+}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ===== Grid ===== */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;padding-bottom:10px}
+.card{
+  background:var(--card);border-radius:var(--radius);overflow:hidden;cursor:pointer;
+  border:1px solid var(--border);transition:transform .25s,box-shadow .25s;position:relative;
+}
+.card:hover{transform:translateY(-5px);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.card .poster{position:relative;aspect-ratio:2/3;background:var(--card2);overflow:hidden}
+.card .poster img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.card:hover .poster img{transform:scale(1.06)}
+.card .poster .no-img{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--muted);font-size:32px;gap:6px;
+}
+.card .poster .no-img small{font-size:11px}
+.badge{position:absolute;top:8px;right:8px;padding:3px 10px;border-radius:8px;font-size:11px;font-weight:700;z-index:2}
+.badge.movie{background:var(--accent)}
+.badge.series{background:#0d7ff2}
+.rating{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.75);color:var(--gold);padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;z-index:2}
+.card .info{padding:10px}
+.card .info h4{font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .info .sub{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.empty{
+  text-align:center;padding:60px 20px;color:var(--muted);
+}
+.empty .big{font-size:52px;margin-bottom:12px}
+
+/* ===== Details Modal ===== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;
+  display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px);
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--bg2);width:100%;max-width:720px;max-height:92vh;overflow-y:auto;
+  border-radius:24px 24px 0 0;border:1px solid var(--border);
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal .backdrop{position:relative;height:220px;background:var(--card2)}
+.modal .backdrop img{width:100%;height:100%;object-fit:cover;opacity:.6}
+.modal .backdrop::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,var(--bg2),transparent)}
+.modal .close{
+  position:absolute;top:14px;left:14px;z-index:5;background:rgba(0,0,0,.6);border:none;color:#fff;
+  width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer;
+}
+.modal .body{padding:0 22px 26px;margin-top:-60px;position:relative;z-index:3}
+.modal .head{display:flex;gap:16px;align-items:flex-end}
+.modal .head .mini-poster{
+  width:110px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;flex-shrink:0;
+  border:2px solid var(--border);background:var(--card2);
+}
+.modal .head .mini-poster img{width:100%;height:100%;object-fit:cover}
+.modal h2{font-size:22px;margin-bottom:6px}
+.modal .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;font-size:12px}
+.chip{background:var(--card);border:1px solid var(--border);padding:4px 12px;border-radius:16px;color:var(--muted)}
+.chip.gold{color:var(--gold)}
+.modal .desc{color:#c3c9d6;font-size:14px;line-height:1.8;margin:12px 0}
+.action-row{display:flex;gap:10px;margin:16px 0;flex-wrap:wrap}
+.btn{
+  padding:11px 22px;border-radius:12px;border:none;cursor:pointer;font-size:14px;
+  font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:.2s;font-family:inherit;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--accent)}
+.btn-ghost.faved{background:var(--gold);color:#000;border-color:var(--gold)}
+.btn-danger{background:#3a1520;color:#ff6b7a;border:1px solid #5c1f2c}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* episodes */
+.eps{margin-top:18px}
+.eps h4{font-size:16px;margin-bottom:10px}
+.season-tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ep-list{display:flex;flex-direction:column;gap:8px}
+.ep-item{
+  display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);
+  padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s;
+}
+.ep-item:hover{border-color:var(--accent)}
+.ep-item .num{
+  width:34px;height:34px;border-radius:10px;background:var(--card2);display:flex;
+  align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;
+}
+.ep-item .t{flex:1;font-size:14px}
+.ep-item .play{color:var(--accent);font-size:18px}
+
+/* ===== Player ===== */
+.player-overlay{
+  position:fixed;inset:0;background:#000;z-index:300;display:none;flex-direction:column;
+}
+.player-overlay.open{display:flex}
+.player-top{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(0,0,0,.9)}
+.player-top .t{flex:1;font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-wrap{flex:1;display:flex;align-items:center;justify-content:center;background:#000}
+.player-wrap video,.player-wrap iframe{width:100%;height:100%;border:none;max-height:100%}
+
+/* ===== Admin ===== */
+.admin-panel{display:none}
+.admin-panel.open{display:block}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px}
+.form-card h3{margin-bottom:16px;font-size:17px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.f-row.single{grid-template-columns:1fr}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text);font-size:14px;outline:none;font-family:inherit;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:80px}
+.admin-list{display:flex;flex-direction:column;gap:10px}
+.admin-item{
+  display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);
+  padding:10px 14px;border-radius:12px;
+}
+.admin-item .thumb{width:44px;height:60px;border-radius:8px;object-fit:cover;background:var(--card2);flex-shrink:0}
+.admin-item .inf{flex:1;min-width:0}
+.admin-item .inf h5{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-item .inf small{color:var(--muted);font-size:12px}
+.mini-btn{
+  padding:7px 12px;border-radius:9px;border:1px solid var(--border);background:var(--card2);
+  color:var(--text);cursor:pointer;font-size:12px;font-weight:700;transition:.2s;font-family:inherit;
+}
+.mini-btn:hover{border-color:var(--accent)}
+.mini-btn.danger{color:#ff6b7a}
+.mini-btn.danger:hover{border-color:#ff6b7a}
+.login-box{max-width:380px;margin:60px auto;text-align:center}
+.login-box .lock{font-size:48px;margin-bottom:14px}
+.hint{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.7}
+
+/* toast */
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);
+  background:var(--card2);border:1px solid var(--accent);color:var(--text);
+  padding:12px 24px;border-radius:14px;z-index:500;font-size:14px;font-weight:600;
+  transition:transform .3s;box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+#toast.show{transform:translateX(-50%) translateY(0)}
+
+/* bottom nav (mobile) */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:150;display:none;
+  background:rgba(18,22,31,.96);backdrop-filter:blur(14px);border-top:1px solid var(--border);
+  padding:8px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.bottom-nav .row{display:flex;justify-content:space-around}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:11px;cursor:pointer;padding:4px 12px}
+.bn-item.active{color:var(--accent)}
+.bn-item .i{font-size:20px}
+body.has-bottomnav{padding-bottom:70px}
+
+@media(max-width:768px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+  .hero-card{height:220px}
+  .hero-info h2{font-size:20px}
+  .f-row{grid-template-columns:1fr}
+  .bottom-nav{display:block}
+  body.has-bottomnav{padding-bottom:76px}
+  .desktop-only{display:none!important}
+}
+.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:30px 16px;border-top:1px solid var(--border);margin-top:40px}
+</style>
+</head>
+<body class="has-bottomnav">
+
+<header>
+  <div class="header-inner">
+    <div class="logo" onclick="goHome()"><span class="icon">🎬</span>سينما<span>بلس</span></div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="ابحث عن فيلم أو مسلسل..." oninput="onSearch(this.value)">
+      <span class="s-icon">🔍</span>
+    </div>
+    <button class="icon-btn desktop-only" id="favBtn" onclick="showFavorites()" title="المفضلة">❤️</button>
+    <button class="icon-btn" onclick="openAdmin()" title="لوحة التحكم">⚙️</button>
+  </div>
+</header>
+
+<!-- ============ MAIN VIEW ============ -->
+<main id="mainView">
+  <div class="hero" id="heroSection"></div>
+  <div class="container">
+    <div class="section-title">
+      <h3 id="listTitle">الكل</h3>
+    </div>
+    <div class="tabs" id="genreTabs"></div>
+    <div class="grid" id="contentGrid"></div>
+    <div class="empty hidden" id="emptyState">
+      <div class="big">🍿</div>
+      <p>لا يوجد محتوى بعد<br><small>افتح لوحة التحكم ⚙️ وأضف أول فيلم أو مسلسل</small></p>
+    </div>
+  </div>
+</main>
+
+<!-- ============ ADMIN VIEW ============ -->
+<main id="adminView" class="admin-panel container" style="padding-top:20px">
+  <!-- login -->
+  <div id="adminLogin" class="login-box">
+    <div class="lock">🔐</div>
+    <h3>لوحة تحكم الأدمن</h3>
+    <p class="hint">أدخل كلمة المرور للمتابعة</p>
+    <div class="field" style="margin-top:16px">
+      <input type="password" id="adminPass" placeholder="كلمة المرور" onkeydown="if(event.key==='Enter')tryLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center" onclick="tryLogin()">دخول</button>
+    <p class="hint" id="passHint"></p>
+  </div>
+
+  <!-- panel -->
+  <div id="adminPanel" class="hidden">
+    <div class="section-title">
+      <h3>لوحة التحكم</h3>
+      <div style="display:flex;gap:8px">
+        <button class="mini-btn" onclick="exportData()">⬇️ تصدير JSON</button>
+        <button class="mini-btn" onclick="document.getElementById('importFile').click()">⬆️ استيراد</button>
+        <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+        <button class="mini-btn" onclick="changePassword()">🔑 كلمة المرور</button>
+      </div>
+    </div>
+
+    <!-- add/edit form -->
+    <div class="form-card">
+      <h3 id="formTitle">➕ إضافة محتوى جديد</h3>
+      <input type="hidden" id="f_id">
+      <div class="f-row">
+        <div class="field"><label>العنوان *</label><input id="f_title" placeholder="اسم الفيلم / المسلسل"></div>
+        <div class="field"><label>النوع</label>
+          <select id="f_type" onchange="onTypeChange()">
+            <option value="movie">فيلم 🎬</option>
+            <option value="series">مسلسل 📺</option>
+          </select>
+        </div>
+      </div>
+      <div class="f-row">
+        <div class="field"><label>التصنيف</label>
+          <select id="f_genre">
+            <option>أكشن</option><option>دراما</option><option>كوميدي</option><option>رعب</option>
+            <option>خيال علمي</option><option>رومانسي</option><option>أنمي</option><option>وثائقي</option><option>أخرى</option>
+          </select>
+        </div>
+        <div class="field"><label>سنة الإصدار</label><input id="f_year" type="number" placeholder="2024"></div>
+      </div>
+      <div class="f-row">
+        <div class="field"><label>التقييم (0-10)</label><input id="f_rating" type="number" step="0.1" min="0" max="10" placeholder="8.5"></div>
+        <div class="field"><label>رابط صورة الغلاف</label><input id="f_poster" placeholder="https://...jpg" dir="ltr"></div>
+      </div>
+      <div class="f-row single">
+        <div class="field"><label>الوصف</label><textarea id="f_desc" placeholder="قصة العمل..."></textarea></div>
+      </div>
+      <div class="f-row single" id="videoField">
+        <div class="field"><label>رابط الفيديو (MP4 مباشر أو رابط Embed)</label><input id="f_video" placeholder="https://...mp4 أو رابط تضمين" dir="ltr"></div>
+      </div>
+      <!-- episodes editor -->
+      <div id="epsEditor" class="hidden">
+        <label style="font-size:13px;color:var(--muted);display:block;margin-bottom:8px">الحلقات</label>
+        <div id="epsList"></div>
+        <button class="mini-btn" onclick="addEpRow()">➕ إضافة حلقة</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-primary" onclick="saveItem()">💾 حفظ</button>
+        <button class="btn btn-ghost" onclick="resetForm()">إلغاء</button>
+      </div>
+    </div>
+
+    <!-- list -->
+    <div class="section-title"><h3>المحتوى الحالي</h3></div>
+    <div class="admin-list" id="adminList"></div>
+  </div>
+</main>
+
+<!-- ============ DETAILS MODAL ============ -->
+<div class="modal-overlay" id="detailsModal" onclick="if(event.target===this)closeDetails()">
+  <div class="modal" id="detailsContent"></div>
+</div>
+
+<!-- ============ PLAYER ============ -->
+<div class="player-overlay" id="playerOverlay">
+  <div class="player-top">
+    <button class="icon-btn" onclick="closePlayer()">✕</button>
+    <div class="t" id="playerTitle"></div>
+  </div>
+  <div class="player-wrap" id="playerWrap"></div>
+</div>
+
+<!-- bottom nav -->
+<nav class="bottom-nav">
+  <div class="row">
+    <div class="bn-item active" id="bn-home" onclick="goHome()"><span class="i">🏠</span>الرئيسية</div>
+    <div class="bn-item" id="bn-movies" onclick="filterType('movie')"><span class="i">🎬</span>أفلام</div>
+    <div class="bn-item" id="bn-series" onclick="filterType('series')"><span class="i">📺</span>مسلسلات</div>
+    <div class="bn-item" id="bn-fav" onclick="showFavorites()"><span class="i">❤️</span>المفضلة</div>
+  </div>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+/* ================== Telegram Mini App ================== */
+try{
+  const tg = window.Telegram?.WebApp;
+  if(tg){ tg.ready(); tg.expand(); tg.setHeaderColor('#0b0e14'); tg.setBackgroundColor('#0b0e14'); }
+}catch(e){}
+
+/* ================== Data Layer ================== */
+const LS_KEY='cinemaplus_data', LS_FAV='cinemaplus_fav', LS_PROG='cinemaplus_prog', LS_PASS='cinemaplus_pass';
+let db = load(LS_KEY) || {items:[]};
+let favs = load(LS_FAV) || [];
+let progress = load(LS_PROG) || {};
+let state = {view:'home', genre:'الكل', type:null, search:'', favMode:false};
+
+function load(k){ try{return JSON.parse(localStorage.getItem(k))}catch(e){return null} }
+function save(k,v){ localStorage.setItem(k,JSON.stringify(v)) }
+function saveDB(){ save(LS_KEY,db) }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6) }
+function esc(s){ return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ================== Rendering ================== */
+function genres(){
+  const g=new Set(['الكل']);
+  db.items.forEach(i=>g.add(i.genre||'أخرى'));
+  return [...g];
+}
+function filtered(){
+  let list=[...db.items].sort((a,b)=>(b.added||0)-(a.added||0));
+  if(state.favMode) list=list.filter(i=>favs.includes(i.id));
+  if(state.type) list=list.filter(i=>i.type===state.type);
+  if(state.genre!=='الكل') list=list.filter(i=>(i.genre||'أخرى')===state.genre);
+  if(state.search){
+    const q=state.search.trim().toLowerCase();
+    list=list.filter(i=>(i.title||'').toLowerCase().includes(q));
+  }
+  return list;
+}
+function render(){
+  renderHero(); renderTabs(); renderGrid();
+}
+function renderHero(){
+  const el=document.getElementById('heroSection');
+  const feat=db.items.filter(i=>i.poster).slice(-1)[0] || db.items.slice(-1)[0];
+  if(!feat){ el.innerHTML=''; return }
+  el.innerHTML=`
+    <div class="hero-card" onclick="openDetails('${feat.id}')">
+      ${feat.poster?`<img src="${esc(feat.poster)}" onerror="this.remove()">`:''}
+      <div class="hero-info">
+        <span class="tag">${feat.type==='movie'?'فيلم':'مسلسل'} ✨ الأحدث</span>
+        <h2>${esc(feat.title)}</h2>
+        <p>${esc(feat.desc||'')}</p>
+        <div class="meta">⭐ ${feat.rating||'—'} · ${feat.year||''} · ${esc(feat.genre||'')}</div>
+      </div>
+    </div>`;
+}
+function renderTabs(){
+  const el=document.getElementById('genreTabs');
+  el.innerHTML=genres().map(g=>
+    `<div class="tab ${state.genre===g?'active':''}" onclick="setGenre('${esc(g)}')">${esc(g)}</div>`).join('');
+}
+function renderGrid(){
+  const list=filtered();
+  const grid=document.getElementById('contentGrid');
+  const empty=document.getElementById('emptyState');
+  document.getElementById('listTitle').textContent =
+    state.favMode?'❤️ المفضلة': state.search?`نتائج البحث: ${state.search}` :
+    state.type==='movie'?'🎬 أفلام': state.type==='series'?'📺 مسلسلات':'الكل';
+  if(!list.length){ grid.innerHTML=''; empty.classList.remove('hidden'); return }
+  empty.classList.add('hidden');
+  grid.innerHTML=list.map(i=>`
+    <div class="card" onclick="openDetails('${i.id}')">
+      <div class="poster">
+        <span class="badge ${i.type}">${i.type==='movie'?'فيلم':'مسلسل'}</span>
+        ${i.rating?`<span class="rating">⭐ ${i.rating}</span>`:''}
+        ${i.poster?`<img src="${esc(i.poster)}" loading="lazy" onerror="this.outerHTML='<div class=no-img>🎬<small>بدون صورة</small></div>'">`
+                  :`<div class="no-img">🎬<small>بدون صورة</small></div>`}
+      </div>
+      <div class="info">
+        <h4>${esc(i.title)}</h4>
+        <div class="sub"><span>${i.year||''}</span><span>${esc(i.genre||'')}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+/* ================== Navigation ================== */
+function setGenre(g){ state.genre=g; render() }
+function onSearch(v){ state.search=v; state.favMode=false; render() }
+function goHome(){
+  state={view:'home',genre:'الكل',type:null,search:'',favMode:false};
+  document.getElementById('searchInput').value='';
+  showMain(); setBN('bn-home'); render();
+}
+function filterType(t){
+  state.type = state.type===t?null:t; state.favMode=false; state.genre='الكل';
+  showMain(); setBN(t==='movie'?'bn-movies':'bn-series'); render();
+}
+function showFavorites(){
+  state.favMode=true; state.type=null; state.genre='الكل';
+  showMain(); setBN('bn-fav'); render();
+}
+function setBN(id){
+  document.querySelectorAll('.bn-item').forEach(e=>e.classList.remove('active'));
+  const el=document.getElementById(id); if(el) el.classList.add('active');
+}
+function showMain(){
+  document.getElementById('mainView').classList.remove('hidden');
+  document.getElementById('adminView').classList.remove('open');
+}
+
+/* ================== Details ================== */
+let currentItem=null;
+function openDetails(id){
+  const i=db.items.find(x=>x.id===id); if(!i) return;
+  currentItem=i;
+  const isFav=favs.includes(i.id);
+  const seasons=[...new Set((i.episodes||[]).map(e=>e.season||1))].sort((a,b)=>a-b);
+  document.getElementById('detailsContent').innerHTML=`
+    <div class="backdrop">
+      ${i.poster?`<img src="${esc(i.poster)}" onerror="this.remove()">`:''}
+      <button class="close" onclick="closeDetails()">✕</button>
+    </div>
+    <div class="body">
+      <div class="head">
+        <div class="mini-poster">${i.poster?`<img src="${esc(i.poster)}" onerror="this.remove()">`:'🎬'}</div>
+        <div>
+          <h2>${esc(i.title)}</h2>
+          <div class="meta-row">
+            <span class="chip gold">⭐ ${i.rating||'—'}</span>
+            <span class="chip">${i.year||'—'}</span>
+            <span class="chip">${esc(i.genre||'')}</span>
+            <span class="chip">${i.type==='movie'?'🎬 فيلم':'📺 مسلسل'}</span>
+          </div>
+        </div>
+      </div>
+      <p class="desc">${esc(i.desc||'لا يوجد وصف.')}</p>
+      <div class="action-row">
+        ${i.type==='movie'?`<button class="btn btn-primary" onclick="playItem()">▶️ تشغيل</button>`:''}
+        <button class="btn btn-ghost ${isFav?'faved':''}" onclick="toggleFav('${i.id}')">${isFav?'❤️ بالمفضلة':'🤍 أضف للمفضلة'}</button>
+      </div>
+      ${i.type==='series'?`
+      <div class="eps">
+        <h4>📺 الحلقات</h4>
+        <div class="season-tabs">${seasons.map((s,x)=>`<div class="tab ${x===0?'active':''}" data-season="${s}" onclick="showSeason(${s},this)">موسم ${s}</div>`).join('')}</div>
+        <div class="ep-list" id="epList"></div>
+      </div>`:''}
+    </div>`;
+  document.getElementById('detailsModal').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(i.type==='series') showSeason(seasons[0]||1);
+}
+function closeDetails(){
+  document.getElementById('detailsModal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function showSeason(s,tab){
+  if(tab){ document.querySelectorAll('.season-tabs .tab').forEach(t=>t.classList.remove('active')); tab.classList.add('active'); }
+  const eps=(currentItem.episodes||[]).filter(e=>(e.season||1)===s);
+  document.getElementById('epList').innerHTML = eps.length? eps.map(e=>`
+    <div class="ep-item" onclick="playEpisode('${e.id}')">
+      <span class="num">${e.num||'?'}</span>
+      <span class="t">${esc(e.title||'حلقة '+(e.num||''))}</span>
+      <span class="play">▶️</span>
+    </div>`).join('') : '<p class="hint">لا توجد حلقات في هذا الموسم</p>';
+}
+function toggleFav(id){
+  if(favs.includes(id)) favs=favs.filter(f=>f!==id);
+  else { favs.push(id); toast('أضيف للمفضلة ❤️'); }
+  save(LS_FAV,favs);
+  openDetails(id); renderGrid();
+}
+
+/* ================== Player ================== */
+let lastPlayed=null;
+function isEmbed(url){ return url && !/\.(mp4|webm|m3u8|mkv|mov)(\?|$)/i.test(url) }
+function playItem(){
+  if(!currentItem?.video){ toast('لا يوجد رابط فيديو ⚠️'); return }
+  openPlayer(currentItem.video, currentItem.title, currentItem.id);
+}
+function playEpisode(epId){
+  const ep=(currentItem.episodes||[]).find(e=>e.id===epId); if(!ep?.video){ toast('لا يوجد رابط للحلقة ⚠️'); return }
+  openPlayer(ep.video, `${currentItem.title} — حلقة ${ep.num||''}`, currentItem.id+'_'+epId);
+}
+function openPlayer(url,title,progKey){
+  lastPlayed={url,title,progKey};
+  document.getElementById('playerTitle').textContent=title;
+  const wrap=document.getElementById('playerWrap');
+  if(isEmbed(url)){
+    wrap.innerHTML=`<iframe src="${esc(url)}" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture"></iframe>`;
+  }else{
+    const start=progress[progKey]?.time||0;
+    wrap.innerHTML=`<video id="vid" controls autoplay playsinline src="${esc(url)}"></video>`;
+    const v=document.getElementById('vid');
+    v.addEventListener('loadedmetadata',()=>{ if(start>5 && start<v.duration-10) v.currentTime=start });
+    v.addEventListener('timeupdate',()=>{
+      if(v.duration) progress[progKey]={time:v.currentTime,dur:v.duration}, save(LS_PROG,progress);
+    });
+  }
+  document.getElementById('playerOverlay').classList.add('open');
+}
+function closePlayer(){
+  document.getElementById('playerWrap').innerHTML='';
+  document.getElementById('playerOverlay').classList.remove('open');
+}
+
+/* ================== Admin ================== */
+function getPass(){ return localStorage.getItem(LS_PASS)||'admin123' }
+function openAdmin(){
+  document.getElementById('mainView').classList.add('hidden');
+  document.getElementById('adminView').classList.add('open');
+  setBN(null);
+  const logged=sessionStorage.getItem('cinema_admin')==='1';
+  document.getElementById('adminLogin').classList.toggle('hidden',logged);
+  document.getElementById('adminPanel').classList.toggle('hidden',!logged);
+  document.getElementById('passHint').textContent = localStorage.getItem(LS_PASS)?'':'كلمة المرور الافتراضية: admin123 (غيّرها من لوحة التحكم)';
+  if(logged) renderAdminList();
+  window.scrollTo(0,0);
+}
+function tryLogin(){
+  const p=document.getElementById('adminPass').value;
+  if(p===getPass()){
+    sessionStorage.setItem('cinema_admin','1');
+    document.getElementById('adminLogin').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+    renderAdminList(); toast('مرحباً بك 👋');
+  }else toast('كلمة مرور خاطئة ❌');
+}
+function changePassword(){
+  const np=prompt('كلمة المرور الجديدة:'); if(!np) return;
+  localStorage.setItem(LS_PASS,np); toast('تم تغيير كلمة المرور 🔑');
+}
+function onTypeChange(){
+  const t=document.getElementById('f_type').value;
+  document.getElementById('videoField').classList.toggle('hidden',t!=='movie');
+  document.getElementById('epsEditor').classList.toggle('hidden',t!=='series');
+  if(t==='series' && !document.querySelector('.ep-row')) addEpRow();
+}
+function addEpRow(ep){
+  const list=document.getElementById('epsList');
+  const row=document.createElement('div');
+  row.className='ep-row'; row.style.cssText='display:grid;grid-template-columns:70px 90px 1fr 2fr 40px;gap:8px;margin-bottom:8px';
+  row.innerHTML=`
+    <input class="ep-season" type="number" placeholder="موسم" value="${ep?.season||1}" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
+    <input class="ep-num" type="number" placeholder="حلقة" value="${ep?.num||''}" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
+    <input class="ep-title" placeholder="عنوان الحلقة" value="${esc(ep?.title||'')}" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
+    <input class="ep-video" placeholder="رابط الفيديو" dir="ltr" value="${esc(ep?.video||'')}" style="padding:8px;border-radius:8px;border:1px solid var(--border);background:var(--bg2);color:var(--text)">
+    <button class="mini-btn danger" onclick="this.parentElement.remove()">🗑</button>`;
+  list.appendChild(row);
+}
+function saveItem(){
+  const title=document.getElementById('f_title').value.trim();
+  if(!title){ toast('العنوان مطلوب ⚠️'); return }
+  const id=document.getElementById('f_id').value || uid();
+  const type=document.getElementById('f_type').value;
+  const item={
+    id, title, type,
+    genre:document.getElementById('f_genre').value,
+    year:document.getElementById('f_year').value,
+    rating:document.getElementById('f_rating').value,
+    poster:document.getElementById('f_poster').value.trim(),
+    desc:document.getElementById('f_desc').value.trim(),
+    added:Date.now()
+  };
+  if(type==='movie') item.video=document.getElementById('f_video').value.trim();
+  else{
+    item.episodes=[...document.querySelectorAll('.ep-row')].map(r=>({
+      id:uid(),
+      season:+r.querySelector('.ep-season').value||1,
+      num:+r.querySelector('.ep-num').value||null,
+      title:r.querySelector('.ep-title').value.trim(),
+      video:r.querySelector('.ep-video').value.trim()
+    })).filter(e=>e.video||e.title);
+  }
+  const idx=db.items.findIndex(x=>x.id===id);
+  if(idx>=0){ item.added=db.items[idx].added; db.items[idx]=item; }
+  else db.items.push(item);
+  saveDB(); resetForm(); renderAdminList(); render();
+  toast('تم الحفظ ✅');
+}
+function resetForm(){
+  document.getElementById('formTitle').textContent='➕ إضافة محتوى جديد';
+  ['f_id','f_title','f_year','f_rating','f_poster','f_desc','f_video'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('epsList').innerHTML='';
+  onTypeChange();
+}
+function editItem(id){
+  const i=db.items.find(x=>x.id===id); if(!i) return;
+  document.getElementById('formTitle').textContent='✏️ تعديل: '+i.title;
+  document.getElementById('f_id').value=i.id;
+  document.getElementById('f_title').value=i.title;
+  document.getElementById('f_type').value=i.type;
+  document.getElementById('f_genre').value=i.genre||'أخرى';
+  document.getElementById('f_year').value=i.year||'';
+  document.getElementById('f_rating').value=i.rating||'';
+  document.getElementById('f_poster').value=i.poster||'';
+  document.getElementById('f_desc').value=i.desc||'';
+  document.getElementById('f_video').value=i.video||'';
+  onTypeChange();
+  document.getElementById('epsList').innerHTML='';
+  (i.episodes||[]).forEach(e=>addEpRow(e));
+  window.scrollTo(0,0);
+}
+function deleteItem(id){
+  if(!confirm('حذف هذا المحتوى نهائياً؟')) return;
+  db.items=db.items.filter(x=>x.id!==id);
+  saveDB(); renderAdminList(); render(); toast('تم الحذف 🗑');
+}
+function renderAdminList(){
+  const el=document.getElementById('adminList');
+  el.innerHTML = db.items.length? db.items.map(i=>`
+    <div class="admin-item">
+      ${i.poster?`<img class="thumb" src="${esc(i.poster)}" onerror="this.outerHTML='<div class=thumb></div>'">`:'<div class="thumb"></div>'}
+      <div class="inf">
+        <h5>${esc(i.title)}</h5>
+        <small>${i.type==='movie'?'🎬 فيلم':'📺 مسلسل ('+(i.episodes||[]).length+' حلقة)'} · ${i.year||'—'} · ${esc(i.genre||'')}</small>
+      </div>
+      <button class="mini-btn" onclick="editItem('${i.id}')">✏️ تعديل</button>
+      <button class="mini-btn danger" onclick="deleteItem('${i.id}')">🗑</button>
+    </div>`).join('') : '<p class="hint">لا يوجد محتوى — أضف أول عمل من الأعلى 👆</p>';
+}
+
+/* ================== Export / Import ================== */
+function exportData(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='data.json'; a.click();
+  toast('تم التصدير — ارفع الملف بجانب index.html على GitHub ⬇️');
+}
+function importData(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const d=JSON.parse(r.result);
+    if(d.items){ db=d; saveDB(); renderAdminList(); render(); toast('تم الاستيراد ✅'); }
+    else toast('ملف غير صالح ❌');
+  }catch(e){ toast('ملف غير صالح ❌') } };
+  r.readAsText(f); ev.target.value='';
+}
+/* auto-load data.json if exists (when hosted on GitHub) */
+fetch('data.json').then(r=>r.ok?r.json():null).then(d=>{
+  if(d?.items?.length && !db.items.length){ db=d; saveDB(); render(); }
+}).catch(()=>{});
+
+/* init */
+render();
+</script>
+</body>
+</html>
